@@ -45,7 +45,7 @@ rapidly building custom designs.
 
 ## Licença
 
-Licenciado sob a licença MIT - veja [LICENSE.md](LICENSE.md) para mais informações.
+Licenciado sob a licença MIT - veja [LICENSE](LICENSE) para mais informações.
 
 ## Acknowledgments
 
