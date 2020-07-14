@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import PageTitle from '../components/PageTitle'
+import ValidacaoForm from '../utils/validacaoForm'
 
 const Pesquisa = () => {
   const [ form, setForm ] = useState({    
@@ -11,28 +12,48 @@ const Pesquisa = () => {
   })
 
   const notas = [0, 1, 2, 3, 4, 5]
+
   const [ success, setSuccess ] = useState(false)
   const [ retorno, setRetorno ] = useState({})
-  const save = async () => {    
-    try{
-      const response = await fetch('/api/save', {
-        method: 'POST',
-        body: JSON.stringify(form)
+  const [ valid,   setValid ]   = useState({
+    status: true,
+    message: []
+  })
+
+  const save = async () => {
+    
+    const val = ValidacaoForm(form)
+      setValid({
+          status: val.status,
+          message: val.message
       })
-      const data = await response.json()
-      setSuccess(true)
-      setRetorno(data)
-    } catch (err) {
+        
+    if (val.status)
+    {
+      try {
+        const response = await fetch('/api/save', {
+          method: 'POST',
+          body: JSON.stringify(form)
+        })
+
+        const data = await response.json()
+        setSuccess(true)
+        setRetorno(data)
+      } catch (err) {
+      }
     }
   }
+
   const onChange = evt => {
     const valueNome = evt.target.value
     const key = evt.target.name
-    setForm(old => ({
+
+    setForm (old => ({
       ...old,
-      [key]: valueNome
+      [key]: valueNome.trim()
     }))
   }
+
   return (
     <div className='p-4'>
       <PageTitle title='Pesquisa' />
@@ -43,21 +64,66 @@ const Pesquisa = () => {
       </p>
       { !success &&
         <div className='w-1/5 mx-auto'>
+
+          { !valid.status && 
+            <div className='mx-auto text-center my-2 bg-red-100 py-2 px-4 bg-red-200 border-t border-b border-red-500'>
+              <p className='text-sm pb-2 font-bold text-red-700 text-left'>Verifique</p>
+              { valid.message.map (msg => {
+                return (
+                  <p className='text-xs italic text-red-700 text-left'>* {msg}</p>
+                )
+              })}
+          </div>
+          }
+
           <label className='font-bold text-gray-800'>Seu nome:</label>
-          <input type='text' className='p-4 block shadow-md bg-blue-100 mb-2 rounded' placeholder='Nome' onChange={onChange} name='Nome' value={form.Nome} />
+          <input
+            type='text'
+            className='p-4 block shadow-md bg-blue-100 mb-2 rounded'
+            placeholder='Nome'
+            onChange={onChange}
+            name='Nome'
+            value={form.Nome} />
+
           <label className='font-bold text-gray-800'>E-mail:</label>
-          <input type='email' className='p-4 block shadow-md bg-blue-100 mb-2 rounded' placeholder='E-mail' onChange={onChange} name='Email' value={form.Email} />
+          <input
+            type='email'
+            className='p-4 block shadow-md bg-blue-100 mb-2 rounded'
+            placeholder='E-mail'
+            onChange={onChange}
+            name='Email'
+            value={form.Email} />
+
           <label className='font-bold text-gray-800'>Telefone:</label>          
-          <input type='tel' className='p-4 block shadow-md bg-blue-100 mb-2 rounded' placeholder='WhatsApp' onChange={onChange} name='Fone' value={form.Fone} />
+          <input
+            type='tel'
+            className='p-4 block shadow-md bg-blue-100 mb-2 rounded'
+            placeholder='WhatsApp'
+            onChange={onChange}
+            name='Fone'
+            value={form.Fone} />
+
           <label className='font-bold text-gray-800'>O que podemos fazer melhor?</label>
-          <textarea type='text' className='p-4 block shadow-md bg-blue-100 mb-2 rounded' rows="3" cols="30" placeholder='Crítica ou sugestão' onChange={onChange} name='Opiniao' value={form.Opiniao} />
-          <label className='font-bold text-gray-800'><p className='text-center mt-4'>Atribua uma nota para a sua experiência aqui hoje:</p></label>
+          <textarea
+            type='text'
+            className='p-4 block shadow-md bg-blue-100 mb-2 rounded'
+            rows="3" cols="30"
+            placeholder='Crítica ou sugestão <opcional>'
+            onChange={onChange}
+            name='Opiniao'
+            value={form.Opiniao} />
+
+          <label className='font-bold text-gray-800'>
+            <p className='text-center mt-4'>Que nota você daria para a sua experiência aqui hoje?</p></label>
+
           <div className='flex px-4 pt-2 pb-4'>
-          { notas.map(nota => {
-              return (<label className='block w-1/6 text-center'>
-                        {nota} <br />
-                        <input type='radio' name='Nota' value={nota} onChange={onChange} />
-                      </label>)
+          { notas.map (nota => {
+              return (
+                <label className='block w-1/6 text-center'>
+                  {nota} <br />
+                  <input type='radio' name='Nota' value={nota} onChange={onChange} />
+                </label>
+              )
             })
           }
           </div>
